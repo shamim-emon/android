@@ -1,9 +1,8 @@
 package com.x8bit.bitwarden.ui.platform.glide
 
-import com.bumptech.glide.module.AppGlideModule
-import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertTrue
-import org.junit.Test
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Test
 
 /**
  * Test class for [BitwardenAppGlideModule] to verify mTLS configuration is properly applied
@@ -20,18 +19,7 @@ class BitwardenAppGlideModuleTest {
         // Verify the module can be created
         val module = BitwardenAppGlideModule()
 
-        assertNotNull("BitwardenAppGlideModule should be instantiable", module)
-    }
-
-    @Test
-    fun `BitwardenAppGlideModule should extend AppGlideModule`() {
-        // Verify the module properly extends AppGlideModule for Glide integration
-        val module = BitwardenAppGlideModule()
-
-        assertTrue(
-            "BitwardenAppGlideModule must extend AppGlideModule",
-            module is AppGlideModule,
-        )
+        assertNotNull(module)
     }
 
     @Test
@@ -41,10 +29,7 @@ class BitwardenAppGlideModuleTest {
             .declaredClasses
             .firstOrNull { it.simpleName == "BitwardenGlideEntryPoint" }
 
-        assertNotNull(
-            "BitwardenAppGlideModule must define BitwardenGlideEntryPoint interface for Hilt",
-            entryPointInterface,
-        )
+        assertNotNull(entryPointInterface)
     }
 
     @Test
@@ -54,14 +39,11 @@ class BitwardenAppGlideModuleTest {
             .declaredClasses
             .firstOrNull { it.simpleName == "BitwardenGlideEntryPoint" }
 
-        assertNotNull("BitwardenGlideEntryPoint must exist", entryPointInterface)
+        assertNotNull(entryPointInterface, "BitwardenGlideEntryPoint must exist")
 
         val methods = entryPointInterface!!.declaredMethods
         val hasCertificateManagerMethod = methods.any { it.name == "certificateManager" }
 
-        assertTrue(
-            "BitwardenGlideEntryPoint must have certificateManager() method",
-            hasCertificateManagerMethod,
-        )
+        assertTrue(hasCertificateManagerMethod)
     }
 }
