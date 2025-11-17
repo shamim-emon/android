@@ -6,6 +6,8 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.Priority
 import com.bumptech.glide.Registry
 import com.bumptech.glide.annotation.GlideModule
+import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.HttpException
 import com.bumptech.glide.load.Options
 import com.bumptech.glide.load.data.DataFetcher
 import com.bumptech.glide.load.model.GlideUrl
@@ -94,7 +96,7 @@ class BitwardenAppGlideModule : AppGlideModule() {
             width: Int,
             height: Int,
             options: Options,
-        ): ModelLoader.LoadData<InputStream>? {
+        ): ModelLoader.LoadData<InputStream> {
             return ModelLoader.LoadData(model, OkHttpDataFetcher(client, model))
         }
 
@@ -121,15 +123,19 @@ class BitwardenAppGlideModule : AppGlideModule() {
 
             call = client.newCall(request)
 
-            try {
-                val response = call?.execute()
-                if (response?.isSuccessful == true) {
-                    callback.onDataReady(response.body?.byteStream())
-                } else {
-                    callback.onLoadFailed(Exception("HTTP ${response?.code}: ${response?.message}"))
-                }
+            val localCall = client.newCall(request).also { call = it }
+
+            val response = try {
+                localCall.execute()
             } catch (e: IOException) {
                 callback.onLoadFailed(e)
+                return
+            }
+
+            if (response.isSuccessful) {
+                callback.onDataReady(response.body.byteStream())
+            } else {
+                callback.onLoadFailed(HttpException(response.message, response.code))
             }
         }
 
@@ -143,7 +149,6 @@ class BitwardenAppGlideModule : AppGlideModule() {
 
         override fun getDataClass(): Class<InputStream> = InputStream::class.java
 
-        override fun getDataSource(): com.bumptech.glide.load.DataSource =
-            com.bumptech.glide.load.DataSource.REMOTE
+        override fun getDataSource(): DataSource = DataSource.REMOTE
     }
 }
